@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Happy Birthday Oma!</title>
+	<style>
+		body,
+		html {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			background-color: #111;
+			font-family: "Courier New", monospace;
+		}
+
+		canvas {
+			display: block;
+		}
+
+		#birthdayText {
+			width: 100vw;
+			height: auto;
+			top: 20vh;
+			left: 0vw;
+			position: fixed;
+			text-align: center;
+			font-size: 6vmin;
+			font-weight: 600;
+			color: #ffffff;
+			white-space: normal;
+			word-wrap: break-word;
+			pointer-events: none;
+		}
+	</style>
+</head>
+
+<body>
+
+	<div id="birthdayText"></div>
+	<canvas id="birthdayCanvas"></canvas>
+
+	<script>
+		let canvas = document.getElementById("birthdayCanvas")
+		let ctx = canvas.getContext("2d")
+		canvas.width = window.innerWidth
+		canvas.height = window.innerHeight
+
+
+		let confettiCount = 200
+		let confetti = []
+
+		function random (min, max) {
+			return Math.random() * (max - min) + min
+		}
+
+		class Confetti {
+			constructor () {
+				this.reset()
+			}
+
+			reset () {
+				this.x = random(0, canvas.width)
+				this.y = random(-canvas.height, 0)
+				this.size = random(5, 12)
+				this.shape = Math.random() > 0.5 ? "rect" : "circle"
+				this.color = `hsl(${Math.floor(random(0, 360))}, 100%, 50%)`
+				this.speed = random(2, 5)
+				this.angle = random(0, 2 * Math.PI)
+				this.spin = random(-0.05, 0.05)
+			}
+
+			update () {
+				this.y += this.speed
+				this.angle += this.spin
+				if (this.y > canvas.height) this.reset()
+			}
+
+			draw () {
+				ctx.save()
+				ctx.translate(this.x, this.y)
+				ctx.rotate(this.angle)
+				ctx.fillStyle = this.color
+
+				if (this.shape === "rect") {
+					ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size)
+				} 
+				else {
+					ctx.beginPath()
+					ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2)
+					ctx.fill()
+				}
+				ctx.restore()
+			}
+		}
+
+		for (let i = 0; i < confettiCount; i++) {
+			confetti.push(new Confetti())
+		}
+
+		function animate () {
+			ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+			confetti.forEach(c => {
+				c.update()
+				c.draw()
+			})
+
+			requestAnimationFrame(animate)
+		}
+
+		animate()
+
+		let textEl = document.getElementById("birthdayText")
+		let message = `Liebe Oma Gitte,
+		herzlichen Glückwunsch 
+		zum Geburtstag:
+		
+		Viel Glück und viel Segen,
+		auf all deinen Wegen,
+		Gesundheit und Wohlstand
+		sei auch mit dabei!
+		
+		Dein Enkel Jason
+		`
+		let index = 0
+
+		function typeWriter () {
+			if (index < message.length) {
+				if (message[index] === "\n") {
+					textEl.innerHTML += "<br>"
+				} 
+				else {
+					textEl.innerHTML += message[index]
+				}
+				index++
+				setTimeout(typeWriter, 150)
+			}
+		}
+
+		typeWriter()
+
+		window.addEventListener("resize", () => {
+			canvas.width = window.innerWidth
+			canvas.height = window.innerHeight
+		})
+	</script>
+
+</body>
+
+</html>
